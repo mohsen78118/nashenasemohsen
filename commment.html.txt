@@ -1,0 +1,116 @@
+<?php
+function request ($field) {
+    return isset($_REQUEST[$field]) && $_REQUEST[$field] !="" ?$_REQUEST[$field]:null;
+}
+
+function has_error($field){
+    global $errors;
+    return  isset($errors['field']);
+}
+
+function get_errors ($field) {
+    global $errors;
+    return has_error($field)?$errors['field']:null;
+}
+
+if ($_SERVER['REQUEST_METHOD']=='POST'){
+    $comment=request('comment');
+
+}
+
+$errors=[];
+$success=false;
+
+if (is_null($comment)){
+    echo $errors['comment']='لطفا کامنت خود را تایپ کنید';
+}
+
+
+if (!is_null($comment) ){
+    $link=mysqli_connect('localhost:3306','root','');
+    if (!$link){
+        echo 'error'.mysqli_connect_error();
+        exit();
+    }
+
+    $sql='create database comment';
+    mysqli_select_db($link,'comment');
+//    $sql='create table user(id int AUTO_INCREMENT,comment varchar(100)not null , primary key (id))';
+//    $sql="insert into user (password,email) values ('($email)','($password)')";
+//    $statment=mysqli_prepare($link,"insert into user (comment) values (?)");
+//    mysqli_stmt_bind_param($statment,'s',$comment);
+    $sql="insert into user(comment)values ('($comment)')";
+////$result=mysqli_query($link,$sql);
+//    mysqli_execute($statment);
+//    $sql='select * from user';
+    $result2=mysqli_query($link,$sql);
+    if ($result2){
+        $success=true;
+    }else{
+        echo 'errors'.mysqli_error();
+        exit();
+    }
+//take comment
+    $link1=mysqli_connect('localhost:3306','root','');
+    mysqli_select_db($link1,'comment');
+    $sql1='select * from user';
+    $result1=mysqli_query($link1,$sql1);
+    if (!$result1){
+        echo 'dont connect to database'.mysqli_connect_error($link1);
+    }
+}
+
+?>
+<html>
+<head>
+    <title>send register</title>
+</head>
+<link rel="stylesheet" href="./css style.css">
+<body>
+<?php if ($success){ ?>
+    <?php  echo 'پیام شما ارسال شد...';?>
+<?php  } ?>
+<h3>pleas fild</h3>
+<!--<div class="card">-->
+<!--    <div class="card2">-->
+<form action="#" method="post">
+<!--    <label>comment :</label>-->
+    <input type="text" name="comment"  placeholder="comment"> <br>
+    <?php if (has_error('comment')) {?>
+        <span><?php get_errors('comment')?> </span>
+    <?php  } ?>
+</form>
+<!--    </div>-->
+<!--</div>-->
+<br>
+    <button type="submit">send</button><br> <br><br>
+
+    <!--take comment-->
+
+
+    <table>
+        <thead>
+        <tr>
+            <th>ایدی</th>
+            <th>کامنت</th>
+        </tr>
+        </thead>
+
+
+        <tbody>
+        <?php while ($user=mysqli_fetch_assoc($result1)) { ?>
+
+            <tr>
+            <td style="color: brown"><?=$user['id']?></td>
+            <td style="color: blue" ><?=$user['comment']?></td>
+        </tr>
+        <?php } ?>
+        </tbody>
+    </table>
+
+</body>
+
+
+</form>
+</body>
+</html>
